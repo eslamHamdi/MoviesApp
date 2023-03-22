@@ -39,6 +39,7 @@
         tools:text="Captain America"/>
 
     <ImageView
+        android:id="@+id/book_mark"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/movie_poster"
@@ -55,17 +56,22 @@
         app:layout_constraintStart_toStartOf="@id/movie_title"
         android:layout_marginTop="5dp"
         android:text="@string/overview"/>
-        
-        <TextView
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintTop_toBottomOf="@id/over_view"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:textSize="12sp"
-            android:scrollbars="vertical"
-            />
+            app:layout_constraintEnd_toEndOf="parent">
+            <TextView
+                android:id="@+id/details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:padding="5dp"
+                />
+        </ScrollView>
+
 
 
 

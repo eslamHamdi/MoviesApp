@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/homeFragment"
+        android:title="@string/movies"
+        android:icon="@drawable/ic_baseline_movies_24"/>
 
+    <item android:id="@+id/favoritesFragment"
+        android:title="@string/favorites"
+        android:icon="@drawable/ic_baseline_saved_24"/>
+
+    <item android:id="@+id/movieSearchFragment"
+        android:title="@string/search"
+        android:icon="@drawable/ic_baseline_search_24"/>
 </menu>

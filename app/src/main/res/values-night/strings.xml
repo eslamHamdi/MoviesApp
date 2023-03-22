@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="overview">OverView</string>
+    <string name="search">search</string>
+    <string name="movies">Movies</string>
+    <string name="favorites">Favorites</string>
 </resources>

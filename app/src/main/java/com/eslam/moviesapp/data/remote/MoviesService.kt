@@ -24,5 +24,5 @@ interface MoviesService {
     suspend fun searchByKeyWord(@Query("api_key") apiKey:String= BuildConfig.API_KEY,
                                 @Query("language") lang:String="en-US",
                                 @Query("include_adult") adult:Boolean=false,
-                                @Query("page") page:Int,@Query("query") kewWord:String):ApiResponse<MoviesResponse>
+                                @Query("page") page:Int=1,@Query("query") kewWord:String):ApiResponse<MoviesResponse>
 }
