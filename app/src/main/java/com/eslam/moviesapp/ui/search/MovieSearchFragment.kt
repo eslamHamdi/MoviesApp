@@ -89,19 +89,7 @@ class MovieSearchFragment : Fragment() , SearchAdapter.MovieSearchClick {
         binding?.searchBar!!.addTextChangedListener(textWatcher)
 
 
-
         }
-
-
-
-
-
-
-
-
-
-
-
 
 
     override fun onDestroyView() {
@@ -145,6 +133,13 @@ class MovieSearchFragment : Fragment() , SearchAdapter.MovieSearchClick {
                 binding!!.searchRecycler.adapter = adapter
                 adapter.movieSearchClick=this@MovieSearchFragment
                 adapter.submitList(it)
+                if (it.isEmpty())
+                {
+                    binding!!.noNetwork.visibility = View.VISIBLE
+                }else
+                {
+                    binding!!.noNetwork.visibility = View.GONE
+                }
 
             }
         }
