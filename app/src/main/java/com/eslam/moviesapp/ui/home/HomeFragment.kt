@@ -3,27 +3,24 @@ package com.eslam.moviesapp.ui.home
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.eslam.moviesapp.R
 import com.eslam.moviesapp.common.NetworkObserver
 import com.eslam.moviesapp.databinding.FragmentHomeBinding
 import com.eslam.moviesapp.domain.models.Genre
-import com.eslam.moviesapp.domain.models.Movie
 import com.eslam.moviesapp.domain.models.Movies
 import com.eslam.moviesapp.ui.home.adapters.GenresAdapter
 import com.eslam.moviesapp.ui.home.adapters.MoviesAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -35,7 +32,6 @@ class HomeFragment : Fragment(),GenresAdapter.GenreClick {
     private lateinit var moviesAdapter:MoviesAdapter
     private lateinit var genresAdapter: GenresAdapter
     private val genres:MutableList<Genre> = mutableListOf()
-    private var genreCounter =0
     val viewModel:HomeViewModel by viewModels()
     lateinit var networkObserver:NetworkObserver
     override fun onCreateView(
@@ -85,8 +81,10 @@ class HomeFragment : Fragment(),GenresAdapter.GenreClick {
                     genres.addAll(it)
                     genresAdapter.submitList(it)
 
-                    if (genreCounter < genres.size)
-                    viewModel.getMovies(genres[genreCounter].id,genres[genreCounter].name)
+                    genres.forEach { genre->
+                        viewModel.getMovies(genre.id,genre.name)
+                    }
+
 
 
                 }
@@ -107,11 +105,11 @@ class HomeFragment : Fragment(),GenresAdapter.GenreClick {
                     binding!!.categoriesRecycler.adapter = moviesAdapter
                     moviesAdapter.submitList(newList)
 
-                    genreCounter +=1
-                    if (genreCounter < genres.size)
+                   // genreCounter +=1
+                   // if (genreCounter < genres.size)
                     {
 
-                        viewModel.getMovies(genres[genreCounter].id,genres[genreCounter].name)
+                   //     viewModel.getMovies(genres[genreCounter].id,genres[genreCounter].name)
                    }
                 }else
                 {
@@ -188,9 +186,13 @@ class HomeFragment : Fragment(),GenresAdapter.GenreClick {
             viewModel.filterMovies(id,genre)
         }else
         {
-            genreCounter=0
             moviesAdapter.submitList(listOf())
-            viewModel.getMovies(genres[genreCounter].id,genres[genreCounter].name)
+            viewLifecycleOwner.lifecycleScope.launch {
+                genres.forEach {
+                    viewModel.getMovies(it.id,it.name)
+                }
+            }
+
 
 
         }

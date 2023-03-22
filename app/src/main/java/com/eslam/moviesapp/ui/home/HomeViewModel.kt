@@ -3,18 +3,17 @@ package com.eslam.moviesapp.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eslam.moviesapp.domain.models.Genre
-import com.eslam.moviesapp.domain.models.Movie
 import com.eslam.moviesapp.domain.models.Movies
+import com.eslam.moviesapp.domain.models.Result
 import com.eslam.moviesapp.domain.usecases.GetGenresUseCase
 import com.eslam.moviesapp.domain.usecases.GetMoviesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.eslam.moviesapp.domain.models.Result
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.*
 
 
 @HiltViewModel
@@ -70,9 +69,9 @@ class HomeViewModel @Inject constructor(private val getGenresUseCase: GetGenresU
 
 
 
-    fun getMovies(generId:Int,genreTitle:String)
+   suspend fun getMovies(generId:Int,genreTitle:String)
     {
-       viewModelScope.launch {
+
           getMoviesUseCase.invoke(generId.toString()).collect{
               when(it)
               {
@@ -92,7 +91,7 @@ class HomeViewModel @Inject constructor(private val getGenresUseCase: GetGenresU
                   }
               }
           }
-      }
+
     }
 
     fun filterMovies(generId:Int,genreTitle:String)
