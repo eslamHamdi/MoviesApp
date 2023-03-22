@@ -59,6 +59,7 @@ class MovieDetailsFragment : Fragment() {
                 viewModel.saveMovie(movie)
             }else
             {
+                viewModel.deleteMovie(movie.id)
                 binding!!.bookMark.setImageResource(R.drawable.bookmark_border)
             }
 

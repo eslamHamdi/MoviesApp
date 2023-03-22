@@ -4,12 +4,13 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
@@ -18,14 +19,13 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.eslam.moviesapp.R
 import com.eslam.moviesapp.common.isNetworkConnected
-import com.eslam.moviesapp.databinding.FragmentMovieDetailsBinding
 import com.eslam.moviesapp.databinding.FragmentMovieSearchBinding
 import com.eslam.moviesapp.domain.models.Movie
 import com.eslam.moviesapp.ui.search.adapters.SearchAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -35,6 +35,40 @@ class MovieSearchFragment : Fragment() , SearchAdapter.MovieSearchClick {
     private var binding:FragmentMovieSearchBinding?=null
 
     private val viewModel:SearchViewModel by viewModels()
+    var job: Job? = null
+
+    private val textWatcher: TextWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+
+        }
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+            // get the content of both the edit text
+            job?.cancel()
+            resetSearchList()
+
+            job = MainScope().launch{
+                delay(1000)
+                s.let {
+                    if(it.toString().isNotBlank()|| it.toString().isNotEmpty() ) {
+                        if(isNetworkConnected(requireContext())) {
+                            viewModel.moviesSearch(it.toString())
+                        }else {
+                            Toast.makeText(requireActivity().applicationContext,"Connect To The Internet",Toast.LENGTH_LONG).show()
+                        }
+
+                    }
+
+                }
+            }
+
+
+
+        }
+
+        override fun afterTextChanged(s: Editable) {
+
+        }
+    }
 
 
     override fun onCreateView(
@@ -43,7 +77,7 @@ class MovieSearchFragment : Fragment() , SearchAdapter.MovieSearchClick {
     ): View? {
         // Inflate the layout for this fragment
         binding = FragmentMovieSearchBinding.inflate(LayoutInflater.from(container!!.context),container,false)
-        return inflater.inflate(R.layout.fragment_movie_search, container, false)
+        return binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,44 +86,21 @@ class MovieSearchFragment : Fragment() , SearchAdapter.MovieSearchClick {
 
         addObservers()
 
-        var job: Job? = null
-        binding?.searchBar!!.addTextChangedListener(object :TextWatcher{
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+        binding?.searchBar!!.addTextChangedListener(textWatcher)
 
 
-            }
 
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                job?.cancel()
-                resetSearchList()
-
-                job = viewLifecycleOwner.lifecycleScope.launch{
-                    delay(2000)
-                    p0?.let {
-                        if(it.toString().isNotBlank()|| it.toString().isNotEmpty() ) {
-                            if(isNetworkConnected(requireContext()))
-                            {
-                                viewModel.moviesSearch(it.toString())
-                            }else
-                            {
-                                Toast.makeText(requireActivity().applicationContext,"Connect To The Internet",Toast.LENGTH_LONG).show()
-                            }
-
-                        }
-
-                    }
-                }
-
-            }
-
-            override fun afterTextChanged(p0: Editable?) {
-
-            }
-
-        })
+        }
 
 
-    }
+
+
+
+
+
+
+
+
 
 
 
@@ -132,6 +143,7 @@ class MovieSearchFragment : Fragment() , SearchAdapter.MovieSearchClick {
             viewModel.movieFlow.flowWithLifecycle(viewLifecycleOwner.lifecycle).collect{
                 val adapter = SearchAdapter()
                 binding!!.searchRecycler.adapter = adapter
+                adapter.movieSearchClick=this@MovieSearchFragment
                 adapter.submitList(it)
 
             }
@@ -140,7 +152,7 @@ class MovieSearchFragment : Fragment() , SearchAdapter.MovieSearchClick {
 
 
     private fun resetSearchList(){
-        if ( binding!!.searchBar.editableText.isEmpty() ||  binding!!.searchBar.editableText.isBlank())
+        if ( binding!!.searchBar.text.isEmpty() ||  binding!!.searchBar.editableText.isBlank())
         {
              viewModel.resetSearch()
         }

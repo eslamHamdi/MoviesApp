@@ -8,4 +8,6 @@ interface LocalDataSource {
     suspend fun saveFavorite(movie: MovieEntity)
 
     fun getFavorites(): Flow<List<MovieEntity>>
+
+    suspend fun deleteFavorite(id:Int)
 }

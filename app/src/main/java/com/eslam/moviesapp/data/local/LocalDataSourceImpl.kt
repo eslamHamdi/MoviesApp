@@ -13,4 +13,8 @@ class LocalDataSourceImpl @Inject constructor(private val moviesDataBase: Movies
     override fun getFavorites(): Flow<List<MovieEntity>> {
         return moviesDataBase.getFavoritesDao().getAllFavorites()
     }
+
+    override suspend fun deleteFavorite(id: Int) {
+        moviesDataBase.getFavoritesDao().deleteMovie(id)
+    }
 }

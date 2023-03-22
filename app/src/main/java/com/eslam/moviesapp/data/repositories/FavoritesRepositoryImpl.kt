@@ -19,4 +19,8 @@ class FavoritesRepositoryImpl @Inject constructor(private val localDataSource: L
             it.toMovie()
         }
     }
+
+    override suspend fun deleteFavorite(id: Int) {
+        localDataSource.deleteFavorite(id)
+    }
 }
