@@ -1,5 +1,6 @@
 package com.eslam.moviesapp.ui.home
 
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -14,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.eslam.moviesapp.R
+import com.eslam.moviesapp.common.NetworkObserver
 import com.eslam.moviesapp.databinding.FragmentHomeBinding
 import com.eslam.moviesapp.domain.models.Genre
 import com.eslam.moviesapp.domain.models.Movie
@@ -35,6 +37,7 @@ class HomeFragment : Fragment(),GenresAdapter.GenreClick {
     private val genres:MutableList<Genre> = mutableListOf()
     private var genreCounter =0
     val viewModel:HomeViewModel by viewModels()
+    lateinit var networkObserver:NetworkObserver
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,8 +51,27 @@ class HomeFragment : Fragment(),GenresAdapter.GenreClick {
         super.onViewCreated(view, savedInstanceState)
         moviesAdapter = MoviesAdapter()
         genresAdapter = GenresAdapter()
-        viewModel.getGenres()
+        val connectivityManager =
+            requireActivity().getSystemService(ConnectivityManager::class.java) as ConnectivityManager
+        networkObserver = NetworkObserver(connectivityManager)
+        listenToNetwork(networkObserver!!)
         addObservers()
+    }
+
+    private fun listenToNetwork(networkObserver: NetworkObserver) {
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            networkObserver.networkState.flowWithLifecycle(viewLifecycleOwner.lifecycle).collect{
+                if (it)
+                {
+                    viewModel.getGenres()
+                }else
+                {
+                    Toast.makeText(requireActivity().applicationContext,"No Internet",Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
     }
 
     private fun addObservers() {
