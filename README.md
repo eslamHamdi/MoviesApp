@@ -4,10 +4,10 @@ The app follows MVVM Architecture and written in kotlin.
 The app integrates swipe to delete functionality to delete favorites,network observer to get the data if network is unstable.
 
 # Future Improvements 
--adding pagination to the nested recyclerview by converting normal list adapter to paging data adapter.
+- Adding pagination to the nested recyclerview by converting normal list adapter to paging data adapter.
 
--Injecting coroutine dispatchers 
+- Injecting coroutine dispatchers 
 
-- adding unit tests
+- Adding unit tests
 
 
