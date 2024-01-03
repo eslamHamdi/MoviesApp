@@ -1,10 +1,12 @@
 package com.eslam.moviesapp.data.remote
 
 import com.eslam.moviesapp.data.remote.dto.toGenre
+import com.eslam.moviesapp.data.remote.dto.toMovie
 import com.eslam.moviesapp.data.remote.dto.toMovies
 import com.eslam.moviesapp.data.repositories.RemoteDataSource
 import com.eslam.moviesapp.domain.models.Genre
 import com.eslam.moviesapp.domain.models.Movie
+import com.eslam.moviesapp.domain.models.Movies
 import com.eslam.moviesapp.domain.models.Result
 import com.skydoves.sandwich.message
 import com.skydoves.sandwich.suspendOnError
@@ -39,21 +41,12 @@ class RemoteDataImpl @Inject constructor(private val moviesService: MoviesServic
         }.flowOn(Dispatchers.IO)
     }
 
-    override suspend fun getMoviesByGenre(genre: String,page:Int):Flow<Result<List<Movie>>> {
-        return flow<Result<List<Movie>>> {
-            emit(Result.Loading())
-
-            val result = moviesService.getMoviesListByGenre(page =page, genre = genre)
-
-            result.suspendOnSuccess {
-                emit(Result.Success(this.data.results.toMovies()))
-            }.suspendOnError {
-                emit(Result.Failure(this.message(),this.statusCode.code))
-            }.suspendOnException {
-                emit(Result.Failure(this.message,0))
-            }
-        }.catch {
-            emit(Result.Failure("Connection Error",0))
+    override suspend fun getMoviesByGenre(genre: String,page:Int):Movies? {
+        return try {
+            moviesService.getMoviesListByGenre(page = page, genre = genre).toMovies()
+        }catch (e:Exception)
+        {
+            null
         }
     }
 
@@ -67,7 +60,7 @@ class RemoteDataImpl @Inject constructor(private val moviesService: MoviesServic
 
             val result = moviesService.searchByKeyWord(kewWord = query, page = page)
             result.suspendOnSuccess {
-                emit(Result.Success(this.data.results.toMovies()))
+                emit(Result.Success(this.data.results.toMovie()))
             }.suspendOnError {
                 emit(Result.Failure(this.message(),this.statusCode.code))
             }.suspendOnException {

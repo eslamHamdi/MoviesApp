@@ -23,8 +23,9 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/category_title"
         app:layout_constraintStart_toStartOf="@id/category_title"
-        android:orientation="horizontal"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="3"
         tools:listitem="@layout/movie_item"/>
 
 

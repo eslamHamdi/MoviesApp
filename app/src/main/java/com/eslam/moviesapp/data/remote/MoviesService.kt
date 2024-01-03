@@ -18,7 +18,7 @@ interface MoviesService {
                                      @Query("include_adult") adult:Boolean=false,
                                      @Query("include_video") video:Boolean=false, @Query("page") page:Int,
                                      @Query("with_genres") genre:String
-    ):ApiResponse<MoviesResponse>
+    ):MoviesResponse
 
     @GET("search/movie")
     suspend fun searchByKeyWord(@Query("api_key") apiKey:String= BuildConfig.API_KEY,

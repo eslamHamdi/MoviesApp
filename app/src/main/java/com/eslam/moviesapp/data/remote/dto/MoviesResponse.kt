@@ -1,6 +1,7 @@
 package com.eslam.moviesapp.data.remote.dto
 
 import com.eslam.moviesapp.domain.models.Movie
+import com.eslam.moviesapp.domain.models.Movies
 import com.google.gson.annotations.SerializedName
 
 data class MoviesResponse(
@@ -64,11 +65,18 @@ data class ResultsItem(
 )
 
 
-  fun List<ResultsItem?>?.toMovies():List<Movie>
+  fun List<ResultsItem?>?.toMovie():List<Movie>
   {
 	  return this?.map {
 		  Movie(
 			  it?.overview?:"", it?.title!!, it.genreIds?.get(0)!!,it.posterPath!!,
 			  it.releaseDate!!.substringBefore("-"),it.voteAverage.toString(),it.id!!,it.voteCount!!)
 	  }?: emptyList()
+  }
+
+
+  fun MoviesResponse.toMovies():Movies
+  {
+
+	  return Movies(this.results?.get(0)?.genreIds?.get(0)?.toString()!!, this.results.toMovie(),this.totalPages?:0)
   }

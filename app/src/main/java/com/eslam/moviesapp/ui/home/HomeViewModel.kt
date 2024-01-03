@@ -2,8 +2,9 @@ package com.eslam.moviesapp.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
 import com.eslam.moviesapp.domain.models.Genre
-import com.eslam.moviesapp.domain.models.Movies
+import com.eslam.moviesapp.domain.models.Movie
 import com.eslam.moviesapp.domain.models.Result
 import com.eslam.moviesapp.domain.usecases.GetGenresUseCase
 import com.eslam.moviesapp.domain.usecases.GetMoviesUseCase
@@ -11,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,11 +27,11 @@ class HomeViewModel @Inject constructor(private val getGenresUseCase: GetGenresU
 
     val genreFlow = _genresFlow.asStateFlow()
 
-    private var _moviesFlow:MutableStateFlow<Movies?> = MutableStateFlow(null)
+    private var _moviesFlow:MutableStateFlow<Pair<PagingData<Movie>,String>?> = MutableStateFlow(null)
 
     val movieFlow = _moviesFlow.asStateFlow()
 
-    private var _filteredMoviesFlow:MutableStateFlow<Movies?> = MutableStateFlow(null)
+    private var _filteredMoviesFlow:MutableStateFlow<Pair<PagingData<Movie>,String>?> = MutableStateFlow(null)
 
     val filteredMoviesFlow = _filteredMoviesFlow.asStateFlow()
 
@@ -72,51 +74,27 @@ class HomeViewModel @Inject constructor(private val getGenresUseCase: GetGenresU
    suspend fun getMovies(generId:Int,genreTitle:String)
     {
 
-          getMoviesUseCase.invoke(generId.toString()).collect{
-              when(it)
-              {
-                  is Result.Success->{
-
-                      _moviesFlow.value = Movies(genreTitle,it.value)
-
-
-                      _loadingState.value = false
-                  }
-                  is Result.Failure -> {
-                      _loadingState.value = false
-                      errorMsg.send(it.message?:"Failure")
-                  }
-                  is Result.Loading -> {
-                      _loadingState.value = true
-                  }
-              }
+          getMoviesUseCase(generId.toString(),viewModelScope,genreTitle).catch { exception->
+              errorMsg.send(exception.toString())
+          }.collect{
+              _moviesFlow.value = Pair(it as PagingData<Movie>,genreTitle)
           }
 
     }
 
-    fun filterMovies(generId:Int,genreTitle:String)
+   suspend fun filterMovies(generId:Int,genreTitle:String)
     {
-        viewModelScope.launch {
-            getMoviesUseCase.invoke(generId.toString()).collect{
-                when(it)
-                {
-                    is Result.Success->{
 
-                        _filteredMoviesFlow.value = Movies(genreTitle,it.value)
-
-
-                        _loadingState.value = false
-                    }
-                    is Result.Failure -> {
-                        _loadingState.value = false
-                        errorMsg.send(it.message?:"Failure")
-                    }
-                    is Result.Loading -> {
-                        _loadingState.value = true
-                    }
-                }
-            }
+        getMoviesUseCase(generId.toString(),viewModelScope,genreTitle).catch { exception->
+            errorMsg.send(exception.toString())
+        }.collect{
+            _filteredMoviesFlow.value = Pair(it as PagingData<Movie>,genreTitle)
         }
+    }
+
+    fun resetList()
+    {
+        _moviesFlow.value = null
     }
 
 }

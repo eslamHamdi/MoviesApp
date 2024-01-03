@@ -2,16 +2,16 @@ package com.eslam.moviesapp.ui.home.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
+import com.eslam.moviesapp.R
 import com.eslam.moviesapp.databinding.MovieItemBinding
 import com.eslam.moviesapp.domain.models.Movie
-import com.eslam.moviesapp.R
 
 
-class NestedMoviesAdapter :ListAdapter<Movie, NestedMoviesAdapter.NestedMoviesViewHolder>(NestedMoviesDiffCallBack){
+class NestedMoviesAdapter : PagingDataAdapter<Movie, NestedMoviesAdapter.NestedMoviesViewHolder>(NestedMoviesDiffCallBack){
 
 
     private val imageBaseUrl = "https://image.tmdb.org/t/p/original"
@@ -70,7 +70,7 @@ class NestedMoviesAdapter :ListAdapter<Movie, NestedMoviesAdapter.NestedMoviesVi
 
     override fun onBindViewHolder(holder: NestedMoviesViewHolder, position: Int) {
         val currentItem = getItem(position)
-        holder.bind(currentItem)
+        holder.bind(currentItem!!)
     }
 
 

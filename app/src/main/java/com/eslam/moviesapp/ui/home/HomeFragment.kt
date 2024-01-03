@@ -2,7 +2,6 @@ package com.eslam.moviesapp.ui.home
 
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,7 +31,7 @@ class HomeFragment : Fragment(),GenresAdapter.GenreClick {
     private lateinit var moviesAdapter:MoviesAdapter
     private lateinit var genresAdapter: GenresAdapter
     private val genres:MutableList<Genre> = mutableListOf()
-    val viewModel:HomeViewModel by viewModels()
+    private val viewModel:HomeViewModel by viewModels()
     lateinit var networkObserver:NetworkObserver
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,11 +46,20 @@ class HomeFragment : Fragment(),GenresAdapter.GenreClick {
         super.onViewCreated(view, savedInstanceState)
         moviesAdapter = MoviesAdapter()
         genresAdapter = GenresAdapter()
+        addObservers()
         val connectivityManager =
             requireActivity().getSystemService(ConnectivityManager::class.java) as ConnectivityManager
         networkObserver = NetworkObserver(connectivityManager)
         listenToNetwork(networkObserver!!)
-        addObservers()
+
+    }
+
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding=null
+
     }
 
     private fun listenToNetwork(networkObserver: NetworkObserver) {
@@ -99,21 +107,13 @@ class HomeFragment : Fragment(),GenresAdapter.GenreClick {
                     val currentList = moviesAdapter.currentList
                     val newList:MutableList<Movies> = mutableListOf()
                     newList.addAll(currentList)
-
-                    newList.add(it)
-
+                    newList.add(Movies(it.second, listOf(),0))
                     binding!!.categoriesRecycler.adapter = moviesAdapter
+                    moviesAdapter.setNestedPagingData(pagingData = it.first,viewLifecycleOwner.lifecycleScope)
+
                     moviesAdapter.submitList(newList)
 
-                   // genreCounter +=1
-                   // if (genreCounter < genres.size)
-                    {
 
-                   //     viewModel.getMovies(genres[genreCounter].id,genres[genreCounter].name)
-                   }
-                }else
-                {
-                    Log.e("movies", "addObservers: null", )
                 }
 
 
@@ -145,9 +145,12 @@ class HomeFragment : Fragment(),GenresAdapter.GenreClick {
                 {
 
                     val newList:MutableList<Movies> = mutableListOf()
-                    newList.add(it)
+                    newList.add(Movies(it.second, listOf(),0))
+                    moviesAdapter.submitList(listOf())
                     binding!!.categoriesRecycler.adapter = moviesAdapter
+                    moviesAdapter.setNestedPagingData(it.first,viewLifecycleOwner.lifecycleScope)
                     moviesAdapter.submitList(newList)
+
 
 
                 }
@@ -173,17 +176,15 @@ class HomeFragment : Fragment(),GenresAdapter.GenreClick {
 
 
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        binding=null
-    }
-
     override fun genreOnClick(genre: String,isSelected:Boolean,id: Int) {
 
         if (isSelected)
         {
 
-            viewModel.filterMovies(id,genre)
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.filterMovies(id,genre)
+            }
+
         }else
         {
             moviesAdapter.submitList(listOf())

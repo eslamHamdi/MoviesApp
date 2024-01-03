@@ -1,21 +1,27 @@
 package com.eslam.moviesapp.ui.home.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
+import androidx.paging.PagingData
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.eslam.moviesapp.databinding.MovieCategoryLayoutBinding
 import com.eslam.moviesapp.domain.models.Movie
 import com.eslam.moviesapp.domain.models.Movies
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
 
 class MoviesAdapter:ListAdapter<Movies,MoviesAdapter.MoviesViewHolder>(MoviesDiffCallBack),NestedMoviesAdapter.MovieClick {
 
     private lateinit var movieCategoryLayoutBinding: MovieCategoryLayoutBinding
     private var _selectMovieFlow:MutableStateFlow<Movie?> = MutableStateFlow(null)
+    private val nestedMoviesAdapter:NestedMoviesAdapter = NestedMoviesAdapter()
+    private var pagingData:PagingData<Movie>?=null
+    private var scope:CoroutineScope?=null
     val selectMovieFlow = _selectMovieFlow.asStateFlow()
 
     inner class MoviesViewHolder(private val movieCategoryLayoutBinding: MovieCategoryLayoutBinding)
@@ -27,10 +33,15 @@ class MoviesAdapter:ListAdapter<Movies,MoviesAdapter.MoviesViewHolder>(MoviesDif
                 val moviesList= movies.movieList.onEach {
                     it.genre = movies.genre
                 }
-                val nestedMoviesAdapter:NestedMoviesAdapter = NestedMoviesAdapter()
-                nestedMoviesAdapter.submitList(moviesList)
+
                 movieCategoryLayoutBinding.categoryRecycler.adapter = nestedMoviesAdapter
                 nestedMoviesAdapter.movieClick = this@MoviesAdapter
+                scope?.launch {
+                    nestedMoviesAdapter.submitData(pagingData!!)
+                }
+
+
+
 
             }
 
@@ -63,6 +74,13 @@ class MoviesAdapter:ListAdapter<Movies,MoviesAdapter.MoviesViewHolder>(MoviesDif
     }
 
 
+   fun setNestedPagingData(pagingData: PagingData<Movie>,scope: CoroutineScope)
+    {
+        this.pagingData = pagingData
+        this.scope = scope
+
+
+    }
 
 
 }
